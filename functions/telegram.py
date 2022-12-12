@@ -33,8 +33,14 @@ def telegram_bot(token_data):
     @dp.message_handler(Text(equals='ДОБАВИТЬ ТРЕК-КОД'))
     async def add(message: types.Message):
         await bot.send_message(message.from_user.id, 'Добавьте Ваши трек-коды друг за другом ')
-        text = message.text
-        print(text)
+
+        @dp.message_handler()
+        async def add_truck_code(message_2: types.Message):
+            user_id = message_2.from_user.id
+            text = message_2.text
+
+
+
 
     @dp.message_handler(Text(equals='ДОБАВЛЕНЫ ТРЕК-КОДЫ'))
     async def added(message: types.Message):
