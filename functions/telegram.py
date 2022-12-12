@@ -20,24 +20,34 @@ def telegram_bot(token_data):
         await bot.send_message(message.from_user.id, 'Хотите добавить трек-код? Нажмите кнопку ДОБАВИТЬ ТРЕК-КОДЫ')
         await bot.send_message(message.from_user.id, 'Уже добавили? Нажмите кнопку ДОБАВЛЕНЫ ТРЕК-КОДЫ')
         await bot.send_message(message.from_user.id, 'Выберите ...', reply_markup=nav.mainMenu)
-        a = len(b.get_data_from_db(user_id))
+        sql = f"SELECT * from user_info where chat_id={user_id}"
+        a = len(b.get_data_from_db(user_id, sql))
         if a == 0:
             b.insert_db(user_id, first_name, surname, username, 'insert')
 
-
-
-
-
-
-
     @dp.message_handler(Text(equals='ДОБАВИТЬ ТРЕК-КОД'))
     async def add(message: types.Message):
-        await bot.send_message(message.from_user.id, 'Добавьте Ваши трек-коды друг за другом ')
+        await bot.send_message(message.from_user.id, 'Добавьте Ваши трек-коды друг за другом и потом нажимите кнопку ЗАКОНЧИТЬ')
 
         @dp.message_handler()
         async def add_truck_code(message_2: types.Message):
+            await bot.send_message(message_2.from_user.id, 'Добавлен', reply_markup=nav.mainFinish)
             user_id = message_2.from_user.id
             text = message_2.text
+
+        @dp.message_handler(Text(equals='ЗАКОНЧИТЬ'))
+        async def notify(message_3: types.Message):
+            user_id = message.from_user.id
+            sql = f"select count(truck_number) from user_truck_info where chat_id={user_id} and paid=False and sent=False"
+            await bot.send_message(message_3.from_user.id, 'Все трек-коды добавлены')
+            print(b.get_data_from_db(user_id, sql))
+
+
+
+
+
+
+
 
 
 
