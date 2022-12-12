@@ -17,8 +17,8 @@ def telegram_bot(token_data):
         first_name = message.from_user.first_name
         surname = message.from_user.last_name
         username = message.from_user.username
-        await bot.send_message(message.from_user.id, 'Хотите добавить трек-код? Нажите кнопку ДОБАВИТЬ ТРЕК-КОДЫ')
-        await bot.send_message(message.from_user.id, 'Уже добавили? Нажите кнопку ДОБАВЛЕНЫ ТРЕК-КОДЫ')
+        await bot.send_message(message.from_user.id, 'Хотите добавить трек-код? Нажмите кнопку ДОБАВИТЬ ТРЕК-КОДЫ')
+        await bot.send_message(message.from_user.id, 'Уже добавили? Нажмите кнопку ДОБАВЛЕНЫ ТРЕК-КОДЫ')
         await bot.send_message(message.from_user.id, 'Выберите ...', reply_markup=nav.mainMenu)
         a = len(b.get_data_from_db(user_id))
         if a == 0:
@@ -29,9 +29,12 @@ def telegram_bot(token_data):
 
 
 
+
     @dp.message_handler(Text(equals='ДОБАВИТЬ ТРЕК-КОД'))
     async def add(message: types.Message):
         await bot.send_message(message.from_user.id, 'Добавьте Ваши трек-коды друг за другом ')
+        text = message.text
+        print(text)
 
     @dp.message_handler(Text(equals='ДОБАВЛЕНЫ ТРЕК-КОДЫ'))
     async def added(message: types.Message):

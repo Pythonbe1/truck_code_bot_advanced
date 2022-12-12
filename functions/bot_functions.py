@@ -40,3 +40,16 @@ def insert_db(id, first_name, second_name, link, kind):
     #     cur.execute(sql)
     #     conn.commit()
     #     cur.close()
+
+
+def insert_chat_id__truck_number(id, kind):
+    conn = psycopg2.connect(dbname=os.environ.get("PG_NAME"),
+                            user=os.environ.get("PG_USER"),
+                            password=os.environ.get("PG_PASSWORD"),
+                            host=os.environ.get("PG_HOST"),
+                            port=os.environ.get("PG_PORT"))
+    cur = conn.cursor()
+    if kind == 'insert':
+        pass
+    elif kind == 'update':
+        pass
