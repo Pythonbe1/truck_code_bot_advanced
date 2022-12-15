@@ -1,7 +1,10 @@
+import aiogram
+from aiogram.types import ChatPermissions
+
 from functions import markup as nav
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.utils.markdown import hbold
-from aiogram.dispatcher.filters import Text
+from aiogram.dispatcher.filters import Text, IsReplyFilter
 import nest_asyncio
 from functions import bot_functions as b
 
@@ -25,19 +28,33 @@ def telegram_bot(token_data):
         if a == 0:
             b.insert_db(user_id, first_name, surname, username, 'insert')
 
-    @dp.message_handler(Text(equals='ДОБАВИТЬ ТРЕК-КОД'))
-    async def add(message: types.Message):
-        await bot.send_message(message.from_user.id,
-                               'Добавьте Ваши трек-коды друг за другом и потом нажимите кнопку ЗАКОНЧИТЬ')
+    async def test(message: types.Message):
+        user_id = message.from_user.id
+        print(user_id)
 
-        @dp.message_handler()
-        async def add_truck_code(message_2: types.Message):
-            text = message_2.text
-            user_id = message_2.from_user.id
-            if text != 'ЗАКОНЧИТЬ':
-                await bot.send_message(message_2.from_user.id, 'Добавлен', reply_markup=nav.mainFinish)
-            else:
-                await bot.send_message(message_2.from_user.id, 'Все трек-коды добавлены')
-                sql = f"select count(truck_number) from user_truck_info where chat_id={user_id} and paid=False and sent=False"
 
+
+    # @dp.message_handler()
+    # async def add(message: types.Message):
+    #     text_main = message.text
+    #     if text_main== 'ДОБАВИТЬ ТРЕК-КОД':
+    #         await bot.send_message(message.from_user.id,
+    #                            'Добавьте Ваши трек-коды друг за другом и потом нажимите кнопку ЗАКОНЧИТЬ')
+    #     else:
+    #         await bot.send_message(message.from_user.id,
+    #                                'Вы не нажали кнопку!!!')
+        #
+        #
+        #     # @dp.message_handler()
+        #     # def add_truck_code(message_2: types.Message):
+        #         text = message_2.text
+        #         user_id = message_2.from_user.id
+        #         if text != 'ЗАКОНЧИТЬ':
+        #             b.insert_chat_id__truck_number(user_id, text, 'insert')
+        #             await bot.send_message(message_2.from_user.id, 'Добавлен', reply_markup=nav.mainFinish)
+        #         else:
+        #             await bot.send_message(message_2.from_user.id, 'Все трек-коды добавлены')
+        #             sql = f"select count(truck_number) from user_truck_info where chat_id={user_id} and paid=False and sent=False"
+        # else:
+        #     print('Not pressed')
     executor.start_polling(dp, skip_updates=True)
