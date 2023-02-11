@@ -1,9 +1,9 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-mainAll = KeyboardButton('ДОБАВИТЬ ТРЕК-КОД')
+keyboard1 = InlineKeyboardMarkup()
+keyboard2 = InlineKeyboardMarkup()
 
-mainMenu = ReplyKeyboardMarkup(resize_keyboard=True).add(mainAll)
-
-
-mainend = KeyboardButton('ЗАКОНЧИТЬ')
-mainFinish = ReplyKeyboardMarkup(resize_keyboard=True).add(mainend)
+button1 = InlineKeyboardButton(text="ДОБАВИТЬ ТРЕК-КОД", callback_data="button1")
+button2 = InlineKeyboardButton(text="ЗАКОНЧИТЬ", callback_data="button2")
+keyboard1.add(button1)
+keyboard2.add(button2)

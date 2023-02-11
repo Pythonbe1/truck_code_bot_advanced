@@ -1,4 +1,3 @@
-# from functions import bot_functions
 import os
 from functions import telegram as t
 from dotenv import load_dotenv
