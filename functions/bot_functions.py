@@ -34,7 +34,7 @@ def insert_db(id, first_name, second_name, link, kind):
         cur.close()
 
 
-def insert_chat_id__truck_number(id, text, kind):
+def insert_chat_id__truck_number(id, text, date, kind):
     conn = psycopg2.connect(dbname=os.environ.get("PG_NAME"),
                             user=os.environ.get("PG_USER"),
                             password=os.environ.get("PG_PASSWORD"),
@@ -42,12 +42,9 @@ def insert_chat_id__truck_number(id, text, kind):
                             port=os.environ.get("PG_PORT"))
     cur = conn.cursor()
     if kind == 'insert':
-        sql = f""" INSERT INTO user_truck_info (chat_id, truck_number)
-                         VALUES ({id}, '{text}');"""
+        sql = f""" INSERT INTO user_truck_info (chat_id, truck_code, added_date)
+                         VALUES ({id}, '{text}', '{date}');"""
         cur.execute(sql)
         conn.commit()
         cur.close()
 
-
-    elif kind == 'update':
-        pass
