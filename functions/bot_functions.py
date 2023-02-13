@@ -26,7 +26,7 @@ def insert_db(id, first_name, second_name, link, kind):
                             port=os.environ.get("PG_PORT"))
     cur = conn.cursor()
     if kind == 'insert':
-        sql = f""" INSERT INTO user_info (user_id, first_name, last_name, username)
+        sql = f""" INSERT INTO user_info (chat_id, first_name, last_name, username)
                  VALUES ({id}, '{first_name}', '{second_name}', '{link}');"""
 
         cur.execute(sql)
