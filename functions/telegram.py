@@ -66,7 +66,6 @@ def telegram_bot(token_data):
             sql_1 = f"""select truck_code, added_date from truck_info where truck_code in (select truck_code 
                         from user_truck_info where chat_id={id} and is_paid=True) and {column}=False"""
             data_list = get_data_from_db(sql_1)
-            print(data_list)
             if len(data_list) != 0:
                 result = ''
                 for index, row in data_list.iterrows():
@@ -90,13 +89,14 @@ def telegram_bot(token_data):
         df = get_data_from_db(sql)
         token = os.environ.get("BOT_TOKEN")
         for id in df.chat_id.tolist():
-            sql_1 = f"""select truck_code, added_date from truck_info where truck_code in (select truck_code 
+            sql_1 = f"""select truck_code, added_date, arrive_date from truck_info where truck_code in (select truck_code 
                             from user_truck_info where chat_id={id} and is_paid=True) and {column}=False"""
             data_list = get_data_from_db(sql_1)
             if len(data_list) != 0:
                 result = ''
                 for index, row in data_list.iterrows():
-                    result = result + f"{message_temp}: {row['added_date']}" \
+                    result = result + f"Товар отправленный из Китая: {row['added_date']}\n" \
+                                      f"Прибыл в Алмату: {row['arrive_date']}" \
                              f"\nТрек код: {row['truck_code']}\n"
 
                 telegram_bot_sendtext(token, str(result), id)
