@@ -1,3 +1,4 @@
+import asyncio
 import os
 from datetime import date
 import nest_asyncio
@@ -9,17 +10,19 @@ from functions import markup as nav
 from functions.insert_update_db import get_data_from_db
 import requests
 from dotenv import load_dotenv
+import schedule
 
 load_dotenv()
 
 
-def telegram_bot_sendtext(token, bot_message):
+def telegram_bot_sendtext(token, bot_message, chat_id):
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    chat_id = int(os.environ.get("CHAT_ID"))
+    chat_id = chat_id
     data = {
         "chat_id": chat_id,
         "text": bot_message
     }
+
     response = requests.post(url, json=data)
 
 
@@ -34,7 +37,8 @@ def telegram_bot(token_data):
         first_name = message.from_user.first_name
         surname = message.from_user.last_name
         username = message.from_user.username
-        if user_id != int(os.environ.get("CHAT_ID")):
+
+        if int(user_id) not in [309032069]:
             await bot.send_message(message.from_user.id, 'Хотите добавить трек-код? Нажмите кнопку *ДОБАВИТЬ ТРЕК-КОД*'
                                                          '\n Хотите посмотреть список добавленных трек-кодов? Нажмите кнопку *ДОБАВЛЕННЫЕ ТРЕК-КОДЫ*',
                                    parse_mode=types.ParseMode.MARKDOWN,
@@ -51,6 +55,54 @@ def telegram_bot(token_data):
         if a == 0:
             b.insert_db(user_id, first_name, surname, username, 'insert')
 
+    @dp.message_handler(Text(equals='УВЕДОМЛЕНИЕ КИТАЙ'))
+    async def notification_china(message: types.Message):
+        column = 'is_sent_china'
+        message_temp = 'Дата отправки с Китая в Казахстан'
+        sql = f"""select distinct chat_id from user_truck_info where is_paid=True"""
+        df = get_data_from_db(sql)
+        token = os.environ.get("BOT_TOKEN")
+        for id in df.chat_id.tolist():
+            sql_1 = f"""select truck_code, added_date from truck_info where truck_code in (select truck_code 
+                        from user_truck_info where chat_id={id} and is_paid=True) and {column}=False"""
+            data_list = get_data_from_db(sql_1)
+            if len(data_list) != 0:
+                result = ''
+                for index, row in data_list.iterrows():
+                    result = f"{message_temp}: {row['added_date']}" \
+                             f"\nТрек код: {row['truck_code']}\n"
+
+                telegram_bot_sendtext(token, str(result), id)
+
+                sql = f"""update truck_info
+                          set {column}=True
+                            where truck_code in ({str(data_list.truck_code.tolist())[1:-1]})"""
+                b.update_truck_info(sql)
+
+    @dp.message_handler(Text(equals='УВЕДОМЛЕНИЕ КАЗАХСТАН'))
+    async def notification_china(message: types.Message):
+        column = 'is_sent_kz'
+        message_temp = 'Дата прибытия в Алматы'
+        sql = f"""select distinct chat_id from user_truck_info where is_paid=True"""
+        df = get_data_from_db(sql)
+        token = os.environ.get("BOT_TOKEN")
+        for id in df.chat_id.tolist():
+            sql_1 = f"""select truck_code, added_date from truck_info where truck_code in (select truck_code 
+                            from user_truck_info where chat_id={id} and is_paid=True) and {column}=False"""
+            data_list = get_data_from_db(sql_1)
+            if len(data_list) != 0:
+                result = ''
+                for index, row in data_list.iterrows():
+                    result = f"{message_temp}: {row['added_date']}" \
+                             f"\nТрек код: {row['truck_code']}\n"
+
+                telegram_bot_sendtext(token, str(result), id)
+
+                sql = f"""update truck_info
+                              set {column}=True
+                                where truck_code in ({str(data_list.truck_code.tolist())[1:-1]})"""
+                b.update_truck_info(sql)
+
     @dp.message_handler(Text(equals='ОТКРЫТЬ ДОСТУП В CHAT_ID'))
     async def add_permission_notification(message: types.Message):
         await bot.send_message(message.from_user.id, 'Добавьте CHAT_ID')
@@ -63,7 +115,9 @@ def telegram_bot(token_data):
     @dp.message_handler(lambda message_2: message_2.text not in ['ДОБАВИТЬ ТРЕК-КОД',
                                                                  'ЗАВЕРШИТЬ', 'ГЛАВНОЕ',
                                                                  'ДОБАВЛЕННЫЕ ТРЕК-КОДЫ',
-                                                                 'ОТКРЫТЬ ДОСТУП В CHAT_ID'])
+                                                                 'ОТКРЫТЬ ДОСТУП В CHAT_ID',
+                                                                 'УВЕДОМЛЕНИЕ КИТАЙ',
+                                                                 'УВЕДОМЛЕНИЕ КАЗАХСТАН'])
     async def adding_truck_codes_and_chat_id_permission(message_2: types.Message):
         chat_id = message_2.from_user.id
         truck_code = message_2.text
@@ -73,7 +127,7 @@ def telegram_bot(token_data):
             await bot.send_message(message_2.from_user.id, f'Трек-код добавлен: *{truck_code}*'
                                                            f'\nПосле добавление трек-кодов нажмите кнопку *ЗАВЕРШИТЬ*',
                                    reply_markup=nav.finishMenu, parse_mode=types.ParseMode.MARKDOWN)
-        elif 9 <= len(truck_code) <= 12 and truck_code.isdigit() and chat_id == int(os.environ.get("CHAT_ID")):
+        elif 9 <= len(truck_code) <= 12 and truck_code.isdigit() and chat_id == 309032069:
             b.insert_chat_id_permission(int(truck_code))
             await bot.send_message(message_2.from_user.id, f'Доступ для CHAT_ID={int(truck_code)} открыт')
 
@@ -83,7 +137,7 @@ def telegram_bot(token_data):
     @dp.message_handler(Text(equals='ГЛАВНОЕ'))
     async def open_permission(message: types.Message):
         user_id = message.from_user.id
-        if user_id != int(os.environ.get("CHAT_ID")):
+        if user_id != 309032069:
             await bot.send_message(message.from_user.id, '*ГЛАВНОЕ*',
                                    reply_markup=nav.mainMenu, parse_mode=types.ParseMode.MARKDOWN)
         else:
@@ -107,7 +161,7 @@ def telegram_bot(token_data):
                       f'\nВремя добавления трек-кодов: {today}' \
                       f'\nДобавил количество трек-кодов: {len(data)}' \
                       f'\nДолжен скинуть чек на сумму: {len(data) * 30} тенге'
-        telegram_bot_sendtext(token_data, bot_message)
+        telegram_bot_sendtext(token_data, bot_message, 309032069)
         await bot.send_message(message.from_user.id,
                                f"Количество добавленных и не оплаченных трек-кодов: {hbold(len(data))}"
                                f"\nЧтобы получать уведомление прошу оплатить: {hbold(len(data) * 30)} тенге"

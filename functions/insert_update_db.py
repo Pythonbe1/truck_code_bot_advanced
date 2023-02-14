@@ -61,3 +61,17 @@ def insert_chat_id_permission(id):
     cur.execute(sql)
     conn.commit()
     cur.close()
+
+
+def update_truck_info(sql):
+    conn = psycopg2.connect(dbname=os.environ.get("PG_NAME"),
+                            user=os.environ.get("PG_USER"),
+                            password=os.environ.get("PG_PASSWORD"),
+                            host=os.environ.get("PG_HOST"),
+                            port=os.environ.get("PG_PORT"))
+    cur = conn.cursor()
+    cur.execute(sql)
+    conn.commit()
+    cur.close()
+
+
