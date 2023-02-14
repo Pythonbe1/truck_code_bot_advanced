@@ -66,11 +66,13 @@ def telegram_bot(token_data):
             sql_1 = f"""select truck_code, added_date from truck_info where truck_code in (select truck_code 
                         from user_truck_info where chat_id={id} and is_paid=True) and {column}=False"""
             data_list = get_data_from_db(sql_1)
+            print(data_list)
             if len(data_list) != 0:
                 result = ''
                 for index, row in data_list.iterrows():
-                    result = f"{message_temp}: {row['added_date']}" \
+                    result = result + f"{message_temp}: {row['added_date']}" \
                              f"\nТрек код: {row['truck_code']}\n"
+
 
                 telegram_bot_sendtext(token, str(result), id)
 
@@ -94,7 +96,7 @@ def telegram_bot(token_data):
             if len(data_list) != 0:
                 result = ''
                 for index, row in data_list.iterrows():
-                    result = f"{message_temp}: {row['added_date']}" \
+                    result = result + f"{message_temp}: {row['added_date']}" \
                              f"\nТрек код: {row['truck_code']}\n"
 
                 telegram_bot_sendtext(token, str(result), id)
@@ -167,7 +169,8 @@ def telegram_bot(token_data):
         await bot.send_message(message.from_user.id,
                                f"Количество добавленных и не оплаченных трек-кодов: {hbold(len(data))}"
                                f"\nЧтобы получать уведомление прошу оплатить: {hbold(len(data) * 30)} тенге"
-                               f"\nОбращайтесь к Нургуль Абенова https://t.me/AbenovaNT '")
+                               f"\nЧтобы оплатить,перевести на {hbold('КАСПИ 87079466496')} и отправьте чек "
+                               f"Нургуль Абенова https://t.me/AbenovaNT '")
 
     @dp.message_handler(Text(equals='ДОБАВЛЕННЫЕ ТРЕК-КОДЫ'))
     async def check_truck_code(message: types.Message):
