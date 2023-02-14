@@ -9,3 +9,4 @@ load_dotenv()
 if __name__ == '__main__':
     token = os.environ.get("BOT_TOKEN")
     t.telegram_bot(token)
+

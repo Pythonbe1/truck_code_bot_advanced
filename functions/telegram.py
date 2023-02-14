@@ -4,9 +4,9 @@ import nest_asyncio
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.dispatcher.filters import Text
 from aiogram.utils.markdown import hbold
-from functions import bot_functions as b
+from functions import insert_update_db as b
 from functions import markup as nav
-from functions.bot_functions import get_data_from_db
+from functions.insert_update_db import get_data_from_db
 import requests
 from dotenv import load_dotenv
 
@@ -51,22 +51,34 @@ def telegram_bot(token_data):
         if a == 0:
             b.insert_db(user_id, first_name, surname, username, 'insert')
 
+    @dp.message_handler(Text(equals='ОТКРЫТЬ ДОСТУП В CHAT_ID'))
+    async def add_permission_notification(message: types.Message):
+        await bot.send_message(message.from_user.id, 'Добавьте CHAT_ID')
+
     @dp.message_handler(Text(equals='ДОБАВИТЬ ТРЕК-КОД'))
     async def add_truck_code(message: types.Message):
         await bot.send_message(message.from_user.id, 'После добавление трек-кодов нажмите кнопку *ЗАВЕРШИТЬ*',
                                reply_markup=nav.finishMenu, parse_mode=types.ParseMode.MARKDOWN)
 
-    @dp.message_handler()
-    async def adding_truck_codes(message_2: types.Message):
+    @dp.message_handler(lambda message_2: message_2.text not in ['ДОБАВИТЬ ТРЕК-КОД',
+                                                                 'ЗАВЕРШИТЬ', 'ГЛАВНОЕ',
+                                                                 'ДОБАВЛЕННЫЕ ТРЕК-КОДЫ',
+                                                                 'ОТКРЫТЬ ДОСТУП В CHAT_ID'])
+    async def adding_truck_codes_and_chat_id_permission(message_2: types.Message):
         chat_id = message_2.from_user.id
         truck_code = message_2.text
         today = date.today()
-        b.insert_chat_id__truck_number(chat_id, truck_code, today, kind='insert')
-        await bot.send_message(message_2.from_user.id, f'Трек-код добавлен: *{truck_code}*'
-                                                       f'\nПосле добавление трек-кодов нажмите кнопку *ЗАВЕРШИТЬ*',
-                               reply_markup=nav.finishMenu, parse_mode=types.ParseMode.MARKDOWN)
+        if len(truck_code) >= 13:
+            b.insert_chat_id__truck_number(chat_id, truck_code, today, kind='insert')
+            await bot.send_message(message_2.from_user.id, f'Трек-код добавлен: *{truck_code}*'
+                                                           f'\nПосле добавление трек-кодов нажмите кнопку *ЗАВЕРШИТЬ*',
+                                   reply_markup=nav.finishMenu, parse_mode=types.ParseMode.MARKDOWN)
+        elif 9 <= len(truck_code) <= 12 and truck_code.isdigit() and chat_id == int(os.environ.get("CHAT_ID")):
+            b.insert_chat_id_permission(int(truck_code))
+            await bot.send_message(message_2.from_user.id, f'Доступ для CHAT_ID={int(truck_code)} открыт')
 
-
+        else:
+            await bot.send_message(message_2.from_user.id, 'Трек-код не правильный')
 
     @dp.message_handler(Text(equals='ГЛАВНОЕ'))
     async def open_permission(message: types.Message):
@@ -77,8 +89,6 @@ def telegram_bot(token_data):
         else:
             await bot.send_message(message.from_user.id, '*ГЛАВНОЕ*',
                                    reply_markup=nav.nurgul_button, parse_mode=types.ParseMode.MARKDOWN)
-
-
 
     @dp.message_handler(Text(equals='ЗАВЕРШИТЬ'))
     async def finish(message: types.Message):
@@ -97,7 +107,6 @@ def telegram_bot(token_data):
                       f'\nВремя добавления трек-кодов: {today}' \
                       f'\nДобавил количество трек-кодов: {len(data)}' \
                       f'\nДолжен скинуть чек на сумму: {len(data) * 30} тенге'
-        print(bot_message)
         telegram_bot_sendtext(token_data, bot_message)
         await bot.send_message(message.from_user.id,
                                f"Количество добавленных и не оплаченных трек-кодов: {hbold(len(data))}"

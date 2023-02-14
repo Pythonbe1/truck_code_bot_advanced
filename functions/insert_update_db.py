@@ -48,3 +48,16 @@ def insert_chat_id__truck_number(id, text, date, kind):
         conn.commit()
         cur.close()
 
+
+def insert_chat_id_permission(id):
+    conn = psycopg2.connect(dbname=os.environ.get("PG_NAME"),
+                            user=os.environ.get("PG_USER"),
+                            password=os.environ.get("PG_PASSWORD"),
+                            host=os.environ.get("PG_HOST"),
+                            port=os.environ.get("PG_PORT"))
+    cur = conn.cursor()
+    sql = f"""Update user_truck_info
+     set is_paid=True where chat_id={id}"""
+    cur.execute(sql)
+    conn.commit()
+    cur.close()
