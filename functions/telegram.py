@@ -78,6 +78,7 @@ def telegram_bot(token_data):
                           set {column}=True
                             where truck_code in ({str(data_list.truck_code.tolist())[1:-1]})"""
                 b.update_truck_info(sql)
+        await bot.send_message(message.from_user.id, 'Увемдомление отправлена')
 
     @dp.message_handler(Text(equals='УВЕДОМЛЕНИЕ КАЗАХСТАН'))
     async def notification_china(message: types.Message):
@@ -102,6 +103,7 @@ def telegram_bot(token_data):
                               set {column}=True
                                 where truck_code in ({str(data_list.truck_code.tolist())[1:-1]})"""
                 b.update_truck_info(sql)
+        await bot.send_message(message.from_user.id, 'Увемдомление отправлена')
 
     @dp.message_handler(Text(equals='ОТКРЫТЬ ДОСТУП В CHAT_ID'))
     async def add_permission_notification(message: types.Message):
