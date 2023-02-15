@@ -113,7 +113,7 @@ def telegram_bot(token_data):
 
     @dp.message_handler(Text(equals='ДОБАВИТЬ ТРЕК-КОД'))
     async def add_truck_code(message: types.Message):
-        await bot.send_message(message.from_user.id, 'После добавление трек-кодов нажмите кнопку *ЗАВЕРШИТЬ*',
+        await bot.send_message(message.from_user.id, 'Введите трек код по очереди, после добавления всех трек кодов нажмите кнопку *ЗАВЕРШИТЬ*',
                                reply_markup=nav.finishMenu, parse_mode=types.ParseMode.MARKDOWN)
 
     @dp.message_handler(lambda message_2: message_2.text not in ['ДОБАВИТЬ ТРЕК-КОД',
@@ -126,7 +126,7 @@ def telegram_bot(token_data):
         chat_id = message_2.from_user.id
         truck_code = message_2.text
         today = date.today()
-        if len(truck_code) >= 13:
+        if 15 <= len(truck_code) <= 16:
             b.insert_chat_id__truck_number(chat_id, truck_code, today, kind='insert')
             await bot.send_message(message_2.from_user.id, f'Трек-код добавлен: *{truck_code}*'
                                                            f'\nПосле добавление трек-кодов нажмите кнопку *ЗАВЕРШИТЬ*',
