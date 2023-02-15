@@ -126,7 +126,7 @@ def telegram_bot(token_data):
         chat_id = message_2.from_user.id
         truck_code = message_2.text
         today = date.today()
-        if 15 <= len(truck_code) <= 16:
+        if 13 <= len(truck_code) <= 16:
             b.insert_chat_id__truck_number(chat_id, truck_code, today, kind='insert')
             await bot.send_message(message_2.from_user.id, f'Трек-код добавлен: *{truck_code}*'
                                                            f'\nПосле добавление трек-кодов нажмите кнопку *ЗАВЕРШИТЬ*',
